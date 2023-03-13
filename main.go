@@ -53,6 +53,8 @@ func main() {
 		req.URL.Scheme = originServerURL.Scheme
 		req.RequestURI = ""
 
+		req.Header.Add("domain", "www.baidu.com:80")
+
 		log.Printf("req is :%+v", req)
 		// save the response from the origin server
 		originServerResponse, err := http.DefaultClient.Do(req)
