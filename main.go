@@ -16,8 +16,10 @@ import (
 )
 
 func main() {
-	agentUrl := flag.String("zipkin", "http://localhost:9411", "zipkin url")
+	nodeIp := os.Getenv("NODE_IP")
+	agentUrl := flag.String("zipkin", fmt.Sprintf("http://%s:9411", nodeIp), "zipkin url")
 	flag.Parse()
+	log.Printf("NODE_IP: %s, agentUtrl:%s", nodeIp, agentUrl)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
@@ -51,6 +53,7 @@ func main() {
 		req.URL.Scheme = originServerURL.Scheme
 		req.RequestURI = ""
 
+		log.Printf("req is :%+v", req)
 		// save the response from the origin server
 		originServerResponse, err := http.DefaultClient.Do(req)
 		if err != nil {
