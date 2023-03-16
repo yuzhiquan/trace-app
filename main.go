@@ -19,7 +19,7 @@ func main() {
 	nodeIp := os.Getenv("NODE_IP")
 	agentUrl := flag.String("zipkin", fmt.Sprintf("http://%s:9411", nodeIp), "zipkin url")
 	flag.Parse()
-	log.Printf("NODE_IP: %s, agentUtrl:%s", nodeIp, agentUrl)
+	log.Printf("NODE_IP: %s, agentUtrl:%+v", nodeIp, agentUrl)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
@@ -52,13 +52,15 @@ func main() {
 		req.URL.Host = originServerURL.Host
 		req.URL.Scheme = originServerURL.Scheme
 		req.RequestURI = ""
+		req.Host = "www.baidu.com:80"
 
-		req.Header.Add("domain", "www.baidu.com:80")
+		//req.Header.Add("host", "www.baidu.com:80")
 
 		log.Printf("req is :%+v", req)
 		// save the response from the origin server
 		originServerResponse, err := http.DefaultClient.Do(req)
 		if err != nil {
+			log.Printf("got err in do request to originserver:%+v", err)
 			rw.WriteHeader(http.StatusInternalServerError)
 			_, _ = fmt.Fprint(rw, err)
 			return
@@ -66,7 +68,17 @@ func main() {
 
 		// return response to the client
 		rw.WriteHeader(http.StatusOK)
+
 		io.Copy(rw, originServerResponse.Body)
+
+		log.Printf("originServerResponse:%+v", originServerResponse.Body)
+		for k, v := range originServerResponse.Trailer {
+			for _, value := range v {
+				rw.Header().Set(k, value)
+			}
+		}
+
+		rw.Header().Set("content-type", "text/html; charset=utf-8")
 
 	})
 
