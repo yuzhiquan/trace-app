@@ -17,6 +17,8 @@ import (
 
 func main() {
 	nodeIp := os.Getenv("NODE_IP")
+	nodeZone := os.Getenv("NODE_ZONE")
+	nodeRegion := os.Getenv("NODE_REGION")
 	agentUrl := flag.String("zipkin", fmt.Sprintf("http://%s:9411", nodeIp), "zipkin url")
 	flag.Parse()
 	log.Printf("NODE_IP: %s, agentUtrl:%+v", nodeIp, agentUrl)
@@ -82,5 +84,19 @@ func main() {
 
 	})
 
-	log.Fatal(http.ListenAndServe(":8080", reverseProxy))
+	go http.ListenAndServe(":8080", reverseProxy)
+
+	http.HandleFunc("/region", func(writer http.ResponseWriter, request *http.Request) {
+		fmt.Fprintf(writer, fmt.Sprintf("request to region: %s", nodeRegion))
+	})
+
+	http.HandleFunc("/zone", func(writer http.ResponseWriter, request *http.Request) {
+		fmt.Fprintf(writer, fmt.Sprintf("request to zone: %s", nodeZone))
+	})
+
+	http.HandleFunc("/rezone", func(writer http.ResponseWriter, request *http.Request) {
+		fmt.Fprintf(writer, fmt.Sprintf("request to region: %s zone:%s", nodeRegion, nodeRegion))
+	})
+
+	http.ListenAndServe(":8090", nil)
 }
