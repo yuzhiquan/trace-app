@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 	"log"
 	"strings"
 	"time"
@@ -15,6 +14,7 @@ func DoSingleGrpcRequest(url string, interval int, cpc bool) {
 	if url == "" {
 		url = "localhost:8080"
 	}
+	grpcUrl := url
 	log.Printf("grpc request => %s is begin.", url)
 	go func() {
 		for {
@@ -23,11 +23,10 @@ func DoSingleGrpcRequest(url string, interval int, cpc bool) {
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 			if cpc {
-				ctx = metadata.AppendToOutgoingContext(ctx, "Host", url)
-				url = "127.0.0.1:12345"
+				grpcUrl = "127.0.0.1:12345"
 			}
 			opts := grpc.WithInsecure()
-			cc, err := grpc.Dial(url, opts)
+			cc, err := grpc.Dial(grpcUrl, opts, grpc.WithAuthority(url))
 			if err != nil {
 				log.Println(err)
 				continue

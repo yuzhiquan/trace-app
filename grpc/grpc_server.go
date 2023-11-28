@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"log"
 	"net"
 	"trace-app/grpc/pb"
@@ -14,6 +15,8 @@ type server struct {
 }
 
 func (s *server) Greeting(ctx context.Context, req *pb.GreetingServiceRequest) (*pb.GreetingServiceReply, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	fmt.Printf("metadata:%+v", md)
 	return &pb.GreetingServiceReply{
 		Message: fmt.Sprintf("Hello, %s", req.Name),
 	}, nil
