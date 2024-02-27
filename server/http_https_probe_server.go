@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -36,7 +37,7 @@ func DoHTTPSRequest(url string, interval int) {
 	}()
 }
 
-func DoHTTPRequest(url string, interval int) {
+func DoHTTPRequestOne(url string, interval int) {
 	if url == "" {
 		url = "http://httpbin.org"
 	}
@@ -53,4 +54,11 @@ func DoHTTPRequest(url string, interval int) {
 			fmt.Printf("http request=> %s response code: %d @%s\n", url, res.StatusCode, time.Now())
 		}
 	}()
+}
+
+func DoHTTPRequest(url string, interval int) {
+	urls := strings.Split(url, ",")
+	for _, u := range urls {
+		DoHTTPRequestOne(u, interval)
+	}
 }
