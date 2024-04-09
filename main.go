@@ -17,7 +17,7 @@ func main() {
 	randomFail := flag.Bool("random", false, "random return error for request")
 	flag.BoolVar(&cpc, "cpc", false, "egress under cpc,default is false")
 	flag.Parse()
-	go grpc.RunGrpcServer()
+	go grpc.RunGrpcServer(*randomFail)
 	go server.RunRegionZoneServer(*randomFail)
 	go server.DoHTTPSRequest(*httpsUrl, *interval)
 	go server.DoHTTPRequest(*httpUrl, *interval)

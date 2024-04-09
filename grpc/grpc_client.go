@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"log"
 	"strings"
 	"time"
@@ -36,11 +37,18 @@ func DoSingleGrpcRequest(url string, interval int, cpc bool) {
 			client := pb.NewGreetingServiceClient(cc)
 			request := &pb.GreetingServiceRequest{Name: "Tubiers"}
 
-			resp, err := client.Greeting(ctx, request)
+			var header metadata.MD
+			resp, err := client.Greeting(ctx, request, grpc.Header(&header))
+			if header != nil {
+				for k, v := range header {
+					fmt.Printf("k:%s ==> v:%s", k, v)
+				}
+			}
 			if err != nil {
 				log.Println(err)
 				continue
 			}
+
 			fmt.Printf("Receive grpc response => %s from => %s \n", resp.Message, url)
 		}
 	}()
